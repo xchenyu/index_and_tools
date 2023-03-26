@@ -1,0 +1,5 @@
+server:
+  port: 8088
+ipfs:
+  config:
+    multi-addr: /ip4/127.0.0.1/tcp/5001
