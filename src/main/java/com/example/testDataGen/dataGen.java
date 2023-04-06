@@ -23,7 +23,7 @@ public class dataGen {
         int key;
         String date;
         int type=1;
-        int size=2000;
+        int size=10;
         long start=System.nanoTime();
         try(Writer writer = new FileWriter("E:/testData/testData"+size+".txt")){
             for (int i=0;i<size;i++){

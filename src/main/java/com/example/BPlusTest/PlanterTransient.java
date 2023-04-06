@@ -15,6 +15,17 @@ public class PlanterTransient {
     private int planterUserId;
     private String plantertxID;//交易ID
 
+    @Override
+    public String toString(){
+        return "{"
+                +"planterId:"+planterId+","
+                +"planterName:"+planterName+","
+                +"planterUserId:"+planterUserId+","
+                +"userId:"+userId+","
+                +"date:"+date
+                +"}";
+    }
+
     public int getDate() {
         return date;
     }
