@@ -19,9 +19,9 @@ public class TreeTest {
     public static void main(String[] args) throws IOException {
         BPlusTreePlanter<PlanterTransient, Integer> tree = new BPlusTreePlanter<>(50);
         int low1 = 1000;
-        int high1 = 10000;
+        int high1 = 2000;
         long time1 = System.nanoTime();
-        int size = 4000000;
+        int size = 4;
         String fileName = "E:/BPlusTree_index/index_" + size + ".txt";
         String data_file = "E:/BPlusTree_index/data_file" + ".txt";
         PlanterTransient p1 = new PlanterTransient();
@@ -30,8 +30,8 @@ public class TreeTest {
         for (int i = 0; i < size; i++) {
             int n = ((int) (Math.random() * (high1 - low1))) + low1;
 //            System.out.println("n:"+n);
-            p1.setDate(String.valueOf(n));
-            p1.setPlanterName(String.valueOf(n));
+            p1.setDate(String.valueOf(tt[i]));
+            p1.setPlanterName(String.valueOf(tt[i]));
             tree.insert(p1, p1.getDate(), path_map);
         }
 
@@ -43,29 +43,35 @@ public class TreeTest {
 //        data_To_file(path_map);
 
         System.out.println("插入" + size + "个数据耗时: " + (time2 - time1) + "纳秒，" + (time2 - time1) / 1000 + "微秒，" + (time2 - time1) / 1000000 + "ms");
-//        序列化
-        long ser1 = System.nanoTime();
-        String ser_str = serialize(tree);
-        long ser2 = System.nanoTime();
-        System.out.println("序列化" + size + "个数据耗时: " + (ser2 - ser1) + "纳秒，" + (ser2 - ser1) / 1000 + "微秒，" + (ser2 - ser1) / 1000000 + "ms");
-
-        //树序列写入文件
-        write_file(fileName, ser_str, size);
-
-        //读取文件
-        String tree_str = read_file(fileName);
-
-        //反序列化文件内容
-        long deser1 = System.nanoTime();
-        BPlusTreePlanter new_tree = deserialize(tree, tree_str);
-        long deser2 = System.nanoTime();
-        System.out.println("反序列化" + size + "个数据耗时: " + (deser2 - deser1) + "纳秒，" + (deser2 - deser1) / 1000 + "微秒，" + (deser2 - deser1)/ 1000000 + "ms");
+////        序列化
+//        long ser1 = System.nanoTime();
+//        String ser_str = serialize(tree);
+//        long ser2 = System.nanoTime();
+//        System.out.println("序列化" + size + "个数据耗时: " + (ser2 - ser1) + "纳秒，" + (ser2 - ser1) / 1000 + "微秒，" + (ser2 - ser1) / 1000000 + "ms");
+//
+//        //树序列写入文件
+//        write_file(fileName, ser_str, size);
+//
+//        //读取文件
+//        String tree_str = read_file(fileName);
+//
+//        //反序列化文件内容
+//        long deser1 = System.nanoTime();
+//        BPlusTreePlanter new_tree = deserialize(tree, tree_str);
+//        long deser2 = System.nanoTime();
+//        System.out.println("反序列化" + size + "个数据耗时: " + (deser2 - deser1) + "纳秒，" + (deser2 - deser1) / 1000 + "微秒，" + (deser2 - deser1)/ 1000000 + "ms");
 
         long time10 = System.nanoTime();
-        String ret = new_tree.find(9857);
-//        System.out.println(ret);
+//        int key=743;
+//        String ret = tree.find(key);
+//        List<String> res=new ArrayList<>();
+//        if(ret!=null)res=tx_find(key,ret);
+//        System.out.println(res);
+        HashMap<String, List<String>> rangefind = new HashMap<>();
+        rangefind = tree.Rangefind(90, true, 800, true);
+        List<String> range_find_ret=tx_Rangefind(rangefind);
         long time11 = System.nanoTime();
-        System.out.println("查找耗时：" + (time11 - time10) / 1000000);
+        System.out.println("查找耗时" + size + "个数据耗时: " + (time11 - time10) + "纳秒，" + (time11 - time10) / 1000 + "微秒，" + (time11 - time10) / 1000000 + "ms");
 
     }
 
@@ -134,6 +140,36 @@ public class TreeTest {
             byte[] after = map_serialize(map);
             map_write(after, path);
         }
+    }
+
+    static List<String> tx_find(int key, String path) {
+        HashMap<String, List<String>> map = new HashMap<>();
+        byte[] b = map_read(path);
+        map = map_deserialize(b);
+        List<String> res = map.get(String.valueOf(key));
+        return res;
+    }
+
+    static List<String> tx_Rangefind(HashMap<String, List<String>> findmap) {
+        Iterator<Map.Entry<String, List<String>>> iterator = findmap.entrySet().iterator();
+        List<String> ret=new ArrayList<>();
+        while (iterator.hasNext()) {
+            Map.Entry<String, List<String>> entry = iterator.next();
+            String path=entry.getKey();
+//            获得存储data的文件map
+            HashMap<String, List<String>> values_map = new HashMap<>();
+            byte[] b = map_read(path);
+            values_map = map_deserialize(b);
+            List<String> keys=entry.getValue();
+            for (String key:keys) {
+                List<String> values=new ArrayList<>();
+                values=values_map.get(key);
+                for(int i=0;i<values.size();i++){
+                    ret.add(values.get(i));
+                }
+            }
+        }
+        return ret;
     }
 }
 

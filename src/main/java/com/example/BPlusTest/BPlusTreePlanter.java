@@ -60,8 +60,17 @@ public class BPlusTreePlanter<T, V extends Comparable<V>> {
         return t;
     }
 
+    public void add_path_keys(Node node, int i, HashMap<String, List<String>> map) {
+        String path = node.values.get(i).toString();
+        String key = String.valueOf(node.keys[i]);
+        List<String> keys_collection = new ArrayList<>();
+        keys_collection.add(key);
+        if (map.containsKey(path)) map.get(path).add(key);
+        else map.put(path, keys_collection);
+    }
+
     //    //范围查询
-    public List<T> Rangefind(V min, Boolean isOpen1, V max, Boolean isOpen2) {
+    public HashMap<String, List<String>> Rangefind(V min, Boolean isOpen1, V max, Boolean isOpen2) {
         //0表示左边界，1表示右边界
         List list1 = this.findboundary(0, min);
         List list2 = this.findboundary(1, max);
@@ -69,36 +78,47 @@ public class BPlusTreePlanter<T, V extends Comparable<V>> {
         Integer index1 = (Integer) list1.get(1);
         Node node2 = (Node) list2.get(0);
         Integer index2 = (Integer) list2.get(1);
-        List<T> ret = new ArrayList<>();
+        HashMap<String, List<String>> ret = new HashMap<>();
+//        List<Object[]> ret = new ArrayList<>();
         //左右边界属于同一节点
         if (node1 == node2) {
             for (int i = index1; i <= index2; i++) {
                 if ((isOpen1 && (node1.keys[i] == min))) continue;
                 if ((isOpen2 && (node1.keys[i] == max))) continue;
-                ret.add((T) node1.values.get(i));
+                add_path_keys(node1, i, ret);
+//                String path = node1.values.get(i).toString();
+//                String key = String.valueOf(node1.keys[i]);
+//                List<String> keys_collection = new ArrayList<>();
+//                keys_collection.add(key);
+//                if (ret.containsKey(path)) ret.get(path).add(key);
+//                else ret.put(path, keys_collection);
+//                ret.add((T) node1.values.get(i));
             }
             return ret;
         }
-
-        for (int i = index1; i < node1.number; i++) {
-            if ((isOpen1 && (node1.keys[i] == min))) continue;
-            ret.add((T) node1.values.get(i));
+        //左节点加入
+        for (int left_i = index1; left_i < node1.number; left_i++) {
+            if ((isOpen1 && (node1.keys[left_i] == min))) continue;
+            add_path_keys(node1, left_i, ret);
+//            ret.add((T) node1.values.get(i));
         }
 
         //中间节点符合条件的值插入列表
         Node temp = node1.right;
         while (temp != node2 && (temp != null) && temp.left != node2) {
-            for (int i = 0; i < temp.number; i++) {
-                ret.add((T) temp.values.get(i));
+            for (int m_i = 0; m_i < temp.number; m_i++) {
+                add_path_keys(temp, m_i, ret);
+//                ret.add((T) temp.values.get(i));
             }
             temp = temp.right;
         }
 
         //右边界节点符合条件的值插入列表,当且仅当右边界为闭时插入
         if (node1 != node2) {
-            for (int j = 0; j <= index2; j++) {
-                if (isOpen2 && (node2.keys[j] == max)) continue;
-                ret.add((T) node2.values.get(j));
+            for (int r_i = 0; r_i  <= index2; r_i ++) {
+                if (isOpen2 && (node2.keys[r_i ] == max)) continue;
+                add_path_keys(node2, r_i , ret);
+//                ret.add((T) node2.values.get(j));
             }
         }
         return ret;
@@ -480,9 +500,9 @@ public class BPlusTreePlanter<T, V extends Comparable<V>> {
                     //插入的值在树中已存在，返回该值对应的文件路径即可
                     path = this.values.get(i);
                     List<Object[]> list = new ArrayList<>();
-                    Object[] arr=new Object[2];
-                    arr[0]=key;
-                    arr[1]=value;
+                    Object[] arr = new Object[2];
+                    arr[0] = key;
+                    arr[1] = value.toString();
                     list.add(arr);
                     if (map.containsKey(path)) map.get(path).add(arr);
                     else map.put(path, list);
@@ -536,9 +556,9 @@ public class BPlusTreePlanter<T, V extends Comparable<V>> {
 
             path = com_path(left, l_path, right, r_path, key, 100, 1);
             List<Object[]> list = new ArrayList<>();
-            Object[] arr=new Object[2];
-            arr[0]=key;
-            arr[1]=value;
+            Object[] arr = new Object[2];
+            arr[0] = key;
+            arr[1] = value.toString();
             list.add(arr);
             if (map.containsKey(path)) map.get(path).add(arr);
             else map.put(path, list);
